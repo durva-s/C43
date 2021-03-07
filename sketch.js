@@ -1,7 +1,11 @@
 
 var astGroup, ast1, ast2, ast3, ast4, ast5;
-var bgImg, bg1;
+var bgImg, bg1,explosion,exImg;
 var ast,ship,ship1;
+var gameState = 1;
+var shipLife = 4;
+var planet, planetImg;
+var city, cityImg, bg2;
 
 function preload(){
 bgImg = loadImage("images/bg1.jpg");
@@ -11,7 +15,10 @@ ast2 = loadImage("images/ast2.png");
 ast3 = loadImage("images/ast3.png");
 ast4 = loadImage("images/ast4.png");
 ast5 = loadImage("images/ast5.png");
-
+exImg = loadImage("images/explosion.png");
+planetImg = loadImage("images/planet.png");
+cityImg = loadImage("images/city.png");
+bg2 = loadImage("images/bg2.png");
 }
 
 function setup(){
@@ -23,27 +30,81 @@ function setup(){
     ship = createSprite(80,325,10,10);
     ship.addImage(ship1);
     ship.scale = 0.1
+    astGroup = new Group();
+
+    planet = createSprite(300,1000,40,40);
+    planet.addImage(planetImg);
+    planet.scale = 3;
 
 }
 
 function draw(){
     background(0);
-
-    if(bg1.x<200){
+if(gameState===1){
+    if(bg1.x<200){ 
         bg1.x=300;
     }
     spawnAst();
 
-    if(keyCode===24){
-        ship.y = ship.y - 20;
+    if(keyDown("UP_ARROW")){
+        ship.y = ship.y - 4;
     }
 
+    if(keyDown("DOWN_ARROW")){
+       ship.y = ship.y + 4;
+    }
+
+     
+
+    if(astGroup.collide(ship)){
+        shipLife = shipLife - 1;
+        for(var i = 0; i<astGroup.length;i++){
+            astGroup.get(i).destroy();
+        }
+    }
+
+
+    
+
+    if(shipLife===0){
+        ship.addImage(exImg);
+        ship.scale = 0.7;
+        ship.x = 140;
+        astGroup.setVelocityXEach(0);
+        astGroup.destroyEach();
+        bg1.velocityX = 0;
+    }
+
+    if(frameCount===300){
+        bg1.velocityX = 0;
+        bg1.velocityY = -2;
+        planet.velocityY = -2;
+    }
+
+    if(planet.y===250){
+        planet.velocityY = 0;
+        
+        gameState = 2;
+        
+    }
+
+    if(gameState===2){
+        planet.velocityY = 0;
+        planet.y = 250;
+        console.log(gameState)
+       bg1.addImage(bg2);
+    }
+
+
     drawSprites();
+    fill("white");
+    textSize(14)
+    text("Ship Defences: "+shipLife,460,45);
 }
 
 function spawnAst(){
 
-    if(frameCount%70==0){
+    if(frameCount%72==0){
      ast = createSprite(600,random(0,650),20,20);
     ast.velocityX = -3
     ast.scale = 0.1
@@ -62,5 +123,7 @@ function spawnAst(){
         break;
         default: break;
     }
+    astGroup.add(ast);
+}
 }
 }
